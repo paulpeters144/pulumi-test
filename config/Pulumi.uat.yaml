@@ -1,0 +1,4 @@
+config:
+    env: uat
+    region: EastUS2
+    subscriptionId: a28ff9ae-6c24-49c5-ba40-a97ba2d0894a
