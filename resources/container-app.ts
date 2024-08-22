@@ -2,7 +2,6 @@ import * as azureNative from '@pulumi/azure-native';
 import { IConfig } from '../config/config';
 import { IResourceGroup } from './resource-group';
 import { IContainerRegistry } from './container-registry';
-import { IContainerIdentity } from '.';
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
 
@@ -10,7 +9,7 @@ export interface IContainerApp {}
 
 class ContainerApp {
     constructor(props: ContainerAppProps) {
-        const { config, resourceGroup, containerRegistry, containerIdentity } = props;
+        const { config, resourceGroup, containerRegistry } = props;
 
         const credentials = pulumi
             .all([resourceGroup.name, containerRegistry.name])
@@ -21,21 +20,23 @@ class ContainerApp {
                 })
             );
 
-        const adminUsername = credentials.username?.apply((c) => {
-            return c!;
+        const adminUsername = credentials.username?.apply((creds) => {
+            if (creds) {
+                return creds;
+            }
+            throw new Error('admin username not set');
         })!;
 
         const adminPassword = credentials.apply((c) => {
             if (c.passwords && c.passwords.length > 0) {
                 return c.passwords[0].value!;
             }
-            throw new Error('admin Password not set');
+            throw new Error('admin password not set');
         });
 
-        const containerAppName = `pulumi-container-app-${config.env.lowerCase}`;
         const customImage = `pulumi-container-${config.env.lowerCase}`;
 
-        const myImage = new docker.Image(customImage, {
+        const pulumiImage = new docker.Image(customImage, {
             imageName: pulumi.interpolate`${containerRegistry.loginServer}/${customImage}:latest`,
             build: {
                 context: `../api`,
@@ -51,7 +52,8 @@ class ContainerApp {
             },
         });
 
-        const appServicePlan = new azureNative.web.AppServicePlan('appServicePlan', {
+        const servicePlanName = `pulumi-webapp-svc-plan-${config.env.lowerCase}`;
+        const appServicePlan = new azureNative.web.AppServicePlan(servicePlanName, {
             resourceGroupName: resourceGroup.name,
             kind: 'Linux',
             reserved: true,
@@ -61,7 +63,7 @@ class ContainerApp {
             },
         });
 
-        const webAppName = `container-web-app-${config.env.lowerCase}`;
+        const webAppName = `container-webapp-${config.env.lowerCase}`;
         const webApp = new azureNative.web.WebApp(webAppName, {
             resourceGroupName: resourceGroup.name,
             serverFarmId: appServicePlan.id,
@@ -79,7 +81,7 @@ class ContainerApp {
                 ],
                 detailedErrorLoggingEnabled: true,
                 alwaysOn: true,
-                linuxFxVersion: myImage.imageName.apply((n) => `DOCKER|${n}`),
+                linuxFxVersion: pulumiImage.imageName.apply((name) => `DOCKER|${name}`),
             },
         });
     }
@@ -89,7 +91,6 @@ interface ContainerAppProps {
     config: IConfig;
     resourceGroup: IResourceGroup;
     containerRegistry: IContainerRegistry;
-    containerIdentity: IContainerIdentity;
 }
 
 export function createContainerApp(props: ContainerAppProps): IContainerApp {

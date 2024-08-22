@@ -3,7 +3,6 @@ import * as pulumi from '@pulumi/pulumi';
 export interface IConfig {
     env: EnvName;
     region: string;
-    subscriptionId: string;
 }
 
 class EnvName {
@@ -36,10 +35,6 @@ class Config implements IConfig {
 
     get region(): string {
         return this._config.require('region');
-    }
-
-    get subscriptionId(): string {
-        return this._config.require('subscriptionId');
     }
 
     private _config: pulumi.Config;

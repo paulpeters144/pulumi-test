@@ -12,15 +12,8 @@ const containerRegistry = resource.createContainerRegistry({
     resourceGroup,
 });
 
-const containerIdentity = resource.createContainerIdentity({
-    config,
-    resourceGroup,
-    containerRegistry,
-});
-
 const containerApp = resource.createContainerApp({
     config,
     resourceGroup,
     containerRegistry,
-    containerIdentity,
 });
