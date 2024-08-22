@@ -7,12 +7,13 @@
         "refresh:uat": "cd config && pulumi refresh --stack uat"
     },
     "devDependencies": {
-        "@types/node": "^18",
         "prettier": "3.3.3",
-        "typescript": "^5.0.0"
+        "ts-node": "^10.9.2",
+        "typescript": "^5.5.4"
     },
     "dependencies": {
         "@pulumi/azure-native": "^2.0.0",
+        "@pulumi/docker": "^4.5.5",
         "@pulumi/pulumi": "^3.113.0",
         "@pulumi/random": "^4.16.3"
     }

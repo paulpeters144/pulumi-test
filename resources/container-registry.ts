@@ -8,6 +8,7 @@ export interface IContainerRegistry {
     username: Output<string>;
     passwordRef: Output<string>;
     id: Output<string>;
+    name: Output<string>;
 }
 
 type RegistryCredentialsResult =
@@ -25,6 +26,10 @@ class ContainerRegistry {
     get username(): Output<string> {
         const username = this._credentials.username;
         return username as Output<string>;
+    }
+
+    get name(): Output<string> {
+        return this._value.name;
     }
 
     get passwordRef(): Output<string> {
