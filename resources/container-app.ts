@@ -63,8 +63,8 @@ class ContainerApp {
             },
         });
 
-        const webAppName = `container-webapp-${config.env.lowerCase}`;
-        const webApp = new azureNative.web.WebApp(webAppName, {
+        const pulumiWebAppName = `container-webapp-${config.env.lowerCase}`;
+        const pulumiWebApp = new azureNative.web.WebApp(pulumiWebAppName, {
             resourceGroupName: resourceGroup.name,
             serverFarmId: appServicePlan.id,
             httpsOnly: true,
